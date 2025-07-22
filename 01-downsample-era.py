@@ -92,7 +92,7 @@ valid_years = counts >= expected_steps
 valid_years = valid_years.all(dim=['latitude', 'longitude'])
 
 # Clean season total: compute total snowfall and filter to valid years
-snow_antecedent = sf_oct_may.groupby(season_year).sum(dim='valid_time')
+snow_antecedent = sf_oct_may.groupby(season_year).mean(dim='valid_time')
 snow_antecedent_clean = snow_antecedent.sel(season_year=valid_years.where(valid_years).dropna('season_year').season_year)
 
 # Rename

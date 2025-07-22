@@ -15,9 +15,10 @@ from scipy.stats import ttest_rel
 import glob
 import os
 import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
 
 # Define user
-user = 'johnnyryan'
+user = 'jr555'
 
 # Define path
 path = '/Users/' + user + '/Library/CloudStorage/OneDrive-DukeUniversity/research/albedo/data/'
@@ -30,11 +31,11 @@ mcd_points = xr.open_dataset(path + 'satellite/mcd43a3-points.nc')
 vnp_points = xr.open_dataset(path + 'satellite/vnp43ma3-points.nc')
 vji_points = xr.open_dataset(path + 'satellite/vji43ma3-points.nc')
 
-
 #%%
 
 station1, diff_before, diff_after, diff_overall = [], [], [], []
 station2, aws_slope, aws_sig, mcd_slope, mcd_sig = [], [], [], [], []
+stationary = []
 
 for s in mcd_points['aws'].values:
     p = []
@@ -61,13 +62,18 @@ for s in mcd_points['aws'].values:
     site_summer[site_count != 3] = np.nan
     site_summer[site_summer['aws'] > 0.92] = np.nan
     
-    # Compute differences
+    # Compute differences between AWS and MCD
     diff = site_summer['aws'] - site_summer['mcd']
     diff_overall.append(np.nanmean(diff))
     diff_before.append(np.nanmean(diff['2000-01-01':'2020-01-01']))
     diff_after.append(np.nanmean(diff['2020-01-01':]))
     station1.append(s)
     
+    # Compute differences between MCD and VNP
+    mask1 = np.isfinite(site_summer['mcd']) & np.isfinite(site_summer['vnp'])
+    stationary.append(adfuller(site_summer['mcd'][mask1] - site_summer['vnp'][mask1], 
+                               maxlag=None, regression='ct')[1])
+     
     # Compute trends
     x_aws = site_summer.index.year[(np.isfinite(site_summer['aws']) & (np.isfinite(site_summer['mcd'])))]
     y_aws = site_summer['aws'][(np.isfinite(site_summer['aws']) & (np.isfinite(site_summer['mcd'])))]
@@ -88,12 +94,25 @@ for s in mcd_points['aws'].values:
         aws_sig.append(np.nan)
         mcd_slope.append(np.nan)
         mcd_sig.append(np.nan)
-    
+
+#%%
+
+""" 
+Test whether orbital drift is increasing the difference between AWS and MCD
+
+"""
 mask = np.isfinite(np.array(diff_before)) & np.isfinite(np.array(diff_after))
 a1, a2 = np.array(diff_before)[mask], np.array(diff_after)[mask]
 
 t_stat, p_val = ttest_rel(a1, a2)
+
 print(f"Paired t-test: t = {t_stat:.3f}, p = {p_val:.3g}")
+
+#%%
+""" 
+Test whether MCD is picking up on the same trends as AWS
+
+"""
 
 stats_df = pd.DataFrame(list(zip(station2, aws_slope, aws_sig, mcd_slope, mcd_sig)),
                         columns=['station', 'aws_slope', 'aws_sig', 'mcd_slope', 'mcd_sig'])
@@ -107,7 +126,15 @@ stats_df['direction'] = np.sign(stats_df['aws_slope']) == np.sign(stats_df['mcd_
 
 (stats_df['agree'] == False) & (stats_df['direction'] == True)
 
+
 #%%
+
+"""
+Test whether difference between MCD and VNP is non-stationary.
+
+"""
+
+number_non_stationary = np.sum(np.array(stationary)>0.05) / len(stationary)
 
 
 
@@ -148,25 +175,8 @@ ax1.text(
 
 
 
-x = site_summer.index.year[np.isfinite(site_summer['aws'])]
-y = site_summer['aws'][np.isfinite(site_summer['aws'])]
-slope, intercept, r, p, se = linregress(x, y)
 
-# Format regression results
-regression_text = (
-    f"Slope: {slope:.3f}\n"
-    f"p: {p:.3g}"
-)
 
-x = site_summer.index.year[np.isfinite(site_summer['mcd'])][19:]
-y = site_summer['mcd'][np.isfinite(site_summer['mcd'])][19:]
-slope, intercept, r, p, se = linregress(x, y)
-
-# Format regression results
-regression_text = (
-    f"Slope: {slope:.3f}\n"
-    f"p: {p:.3g}"
-)
 
 
 
@@ -177,3 +187,8 @@ regression_text = (
 
 
 #%%
+
+
+
+
+

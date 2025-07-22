@@ -33,6 +33,9 @@ aws_meta = pd.read_csv(savepath +'/promice/AWS_sites_metadata.csv')
 aws_meta = aws_meta[aws_meta['location_type'] == 'ice sheet']
 point_ids = aws_meta['site_id'].values
 
+# Define conversion factors
+conversion_factors = xr.open_dataset(savepath + 'satellite/conversion-factors.nc')
+
 # Define files
 mcd_files = sorted(glob.glob(mcd_filepath + '*.tif'))
 vnp_files = sorted(glob.glob(vnp_filepath + '*.tif'))

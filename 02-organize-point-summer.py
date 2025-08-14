@@ -134,6 +134,32 @@ for i in range(len(aws_meta)):
 
 #%%
 
+t2m_point_values = [era['t2m'][:, lat, lon].values for lat, lon in zip(lats, lons)]
+sf_w_point_values = [era_winter_sf['sf'][:, lat, lon].values for lat, lon in zip(lats, lons)]
+sf_s_point_values = [era_summer_sf['sf'][:, lat, lon].values for lat, lon in zip(lats, lons)]
+era_dates = pd.to_datetime([f"{year}-12-31" for year in era['year'].values])
+
+# Export as csv
+for i in range(len(aws_meta)):
+    # Get station name
+    name = aws_meta.iloc[i]['site_id']
+    
+    # Define DataFrame
+    df = pd.DataFrame(data=t2m_point_values[i],index=era_dates, columns=["t2m"])
+    df['sf_winter'] = pd.DataFrame(data=sf_w_point_values[i],index=era_dates, columns=["era"])
+    df['sf_summer'] = pd.DataFrame(data=sf_s_point_values[i],index=era_dates, columns=["era"])
+    
+    # Set index name
+    df.index.name = 'datetime'
+    
+    # Export
+    df.to_csv(path2 + 'era5/station/' + name + '.csv')
+
+
+
+
+
+
 
 
 

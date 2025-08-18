@@ -11,6 +11,7 @@ import xarray as xr
 import numpy as np
 import glob
 from pyresample import kd_tree, geometry
+import pandas as pd
 
 #%%
 
@@ -94,16 +95,43 @@ resampled_ds = xr.Dataset({'smb': smb_da, 'melt': melt_da})
 
 #%%
 resampled_ds.to_netcdf(path2 + 'mar-masks.nc')
-                                 
+
+#%%
+"""
+Add column to AWS data
+
+"""
+
+# Import MAR
+mar = xr.open_dataset(path2 + 'mar-masks.nc')
                                       
+# Import AWS metadata
+aws = pd.read_csv(path2 + 'promice/AWS_sites_metadata.csv')                                   
                                       
+lons, lats = [], []
+for a in range(len(aws)):
+    # Find lat and lon
+    lat, lon = aws.iloc[a]['latitude_last_valid'], aws.iloc[a]['longitude_last_valid']
+    
+    dist_sq = (ismip_1km['lat'].values - lat)**2 + (ismip_1km['lon'].values - lon)**2
+    i, j = np.unravel_index(np.argmin(dist_sq), ismip_1km['lat'].values.shape)
+    lons.append(j)
+    lats.append(i)                                 
+
+# Add column with zones                                      
+zone_values = [mar['smb'][lat, lon].values for lat, lon in zip(lats, lons)]
+aws['smb'] = zone_values
+aws["zone"] = aws["smb"].apply(lambda z: "Ablation" if z < 0 else "Accumulation")
+
+# Save to csv
+aws.to_csv(path2 + 'promice/AWS_sites_metadata.csv')
+
+
+#%%
+
+
                                       
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
+#%%                                                                    
                                       
                                       
                                       

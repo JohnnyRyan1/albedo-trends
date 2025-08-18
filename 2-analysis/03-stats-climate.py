@@ -34,6 +34,7 @@ station = []
 residual_trend = []
 residual_sig = []
 rmse_linear = []
+predicted_albedo, observed_albedo = [], []
 
 for file in files:
     
@@ -105,6 +106,22 @@ for file in files:
         # Append
         residual_trend.append(mk.original_test(residuals).trend)
         residual_sig.append(mk.original_test(residuals).p)
+        predicted_albedo.append(np.mean(y_pred_test))
+        observed_albedo.append(np.mean(y_train))
+
+#%%
+
+"""
+Save predicted vs. observed albedo
+
+"""
+
+stats_df = pd.DataFrame(list(zip(station, observed_albedo, predicted_albedo,rmse_linear)),
+                        columns=['station', 'observed', 'predicted', 'rmse'])
+stats_df.to_csv(path + 'linear-model.csv')
+
+print(stats_df['rmse'].mean())
+print(stats_df['rmse'].mean() / stats_df['observed'].mean())
 
 #%%
 

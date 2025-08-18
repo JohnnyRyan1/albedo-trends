@@ -13,7 +13,7 @@ import xarray as xr
 import glob
 
 # Define user
-user = 'johnnyryan'
+user = 'jr555'
 
 # Define filepath
 path1 = '/Users/' + user + '/Library/CloudStorage/OneDrive-DukeUniversity/research/hydrology/data/'
@@ -43,16 +43,6 @@ for i in range(len(aws_meta)):
         if aws_meta.iloc[i]['site_id'] + '_' in file:
             promice_ice_sheet.append(file)
 
-# Define conversion factors
-conversion_factors = xr.open_dataset(path2 + 'satellite/conversion-factors.nc')
-
-# Apply corrections
-vnp_spatial_corrected = vnp['albedo'] + conversion_factors['conversion_vnp'].values
-vji_spatial_corrected = vji['albedo'] + conversion_factors['conversion_vji'].values
-
-vnp_static_corrected = vnp['albedo'] + 0.0058087055
-vji_static_corrected = vji['albedo'] + 0.012903528
-
 # Define air temperature data
 era = xr.open_dataset(path2 + 'era5/era-summer-t2m-1941-2025.nc')
 era_winter_sf = xr.open_dataset(path2 + 'era5/era-summer-sf-1941-2025.nc')
@@ -75,11 +65,6 @@ mcd_point_values = [mcd['albedo'][:, lat, lon].values for lat, lon in zip(lats, 
 vnp_point_values = [vnp['albedo'][:, lat, lon].values for lat, lon in zip(lats, lons)]
 vji_point_values = [vji['albedo'][:, lat, lon].values for lat, lon in zip(lats, lons)]
 
-vnp_point_values_spatial = [vnp_spatial_corrected[:, lat, lon].values for lat, lon in zip(lats, lons)]
-vji_point_values_spatial = [vji_spatial_corrected[:, lat, lon].values for lat, lon in zip(lats, lons)]
-vnp_point_values_static = [vnp_static_corrected[:, lat, lon].values for lat, lon in zip(lats, lons)]
-vji_point_values_static = [vji_static_corrected[:, lat, lon].values for lat, lon in zip(lats, lons)]
-
 modis_dates = pd.to_datetime([f"{year}-12-31" for year in mcd['albedo']['time'].values])
 vnp_dates = pd.to_datetime([f"{year}-12-31" for year in vnp['albedo']['time'].values])
 vji_dates = pd.to_datetime([f"{year}-12-31" for year in vji['albedo']['time'].values])
@@ -88,7 +73,6 @@ era_dates = pd.to_datetime([f"{year}-12-31" for year in era['year'][59:84].value
 t2m_point_values = [era['t2m'][59:84, lat, lon].values for lat, lon in zip(lats, lons)]
 sf_w_point_values = [era_winter_sf['sf'][59:84, lat, lon].values for lat, lon in zip(lats, lons)]
 sf_s_point_values = [era_summer_sf['sf'][59:84, lat, lon].values for lat, lon in zip(lats, lons)]
-
 
 aws = []
 for p in promice_ice_sheet:
@@ -115,12 +99,6 @@ for i in range(len(aws_meta)):
     df['mcd'] = pd.DataFrame(data=mcd_point_values[i],index=modis_dates,  columns=["mcd"])
     df['vnp'] = pd.DataFrame(data=vnp_point_values[i],index=vnp_dates,  columns=["vnp"])
     df['vji'] = pd.DataFrame(data=vji_point_values[i],index=vji_dates,  columns=["vji"])
-
-    df['vnp_static'] = pd.DataFrame(data=vnp_point_values_static[i],index=vnp_dates,  columns=["vnp"])
-    df['vji_static'] = pd.DataFrame(data=vji_point_values_static[i],index=vji_dates,  columns=["vji"])
-    
-    df['vnp_spatial'] = pd.DataFrame(data=vnp_point_values_spatial[i],index=vnp_dates,  columns=["vnp"])
-    df['vji_spatial'] = pd.DataFrame(data=vji_point_values_spatial[i],index=vji_dates,  columns=["vji"])
 
     df['sf_winter'] = pd.DataFrame(data=sf_w_point_values[i],index=era_dates, columns=["era"])
     df['sf_summer'] = pd.DataFrame(data=sf_s_point_values[i],index=era_dates, columns=["era"])

@@ -20,7 +20,6 @@ path = '/Users/' + user + '/Library/CloudStorage/OneDrive-DukeUniversity/researc
 # Read file
 station_df = pd.read_csv(path + 'data/station-error.csv')
 linear_df = pd.read_csv(path + 'data/linear-model.csv')
-stats_df = pd.read_csv(path + 'data/stats-df.csv')
 mcd_trends = pd.read_csv(path + 'data/trends.csv')
 hindcast_df = pd.read_csv(path + 'data/hindcast.csv')
 aws_meta = pd.read_csv(path +'data/promice/AWS_sites_metadata_updated.csv')
@@ -408,15 +407,186 @@ plt.savefig(path + 'manuscript/figX-mcd-1941-lollipop.png', dpi=300)
 
 #%%
 
+"""
+Ranked lollipop chart for air temperature for 1941-2024.
+
+"""
+
+# Create significance flag
+df_sorted["sig_flag"] = df_sorted["t2m_sig_hindcast"].apply(lambda p: "Significant" if p < 0.05 else "Not Significant")
+
+# Main figure and axes
+fig, (ax) = plt.subplots(
+    1, 1,
+    figsize=(8, 4),
+    layout='constrained')
+
+# Colors for points based on significance
+colors1 = df_sorted["sig_flag"].map({"Significant": c1, "Not Significant": c2})
+
+# --- Main plot ---
+# Confidence intervals
+ax.vlines(
+    x=df_sorted.index,
+    ymin=df_sorted["t2m_low_slope"],
+    ymax=df_sorted["t2m_high_slope"],
+    color="k",
+    linewidth=1.5,
+    zorder=3,
+    alpha=0.5
+)
+
+# Slope points
+ax.scatter(df_sorted.index, df_sorted["t2m_slope_hindcast"], c=colors1, s=60, zorder=3)
+
+# Zero line
+ax.axhline(0, color="black", linewidth=1.5, linestyle="--", zorder=2)
+
+# Axis formatting
+ax.set_xticks(df_sorted.index)
+ax.set_xticklabels(df_sorted["station"], rotation=90)
+ax.xaxis.tick_top()
+ax.tick_params(axis='x', labeltop=True, labelbottom=False)
+ax.tick_params(axis='both', which='major', labelsize=11)
+ax.set_ylabel("Air temp. trend 1941-2024 (yr$^{-1}$)", fontsize=12)
+#ax.set_ylim(-0.02, 0.02)
+ax.grid(True, which="both", linestyle="--", linewidth=1, zorder=1)
 
 
+# --- Legend ---
+legend_elements = [
+    Line2D([0], [0], marker='o', color='w', label='Significant (p < 0.05)',
+           markerfacecolor=c1, markersize=8),
+    Line2D([0], [0], marker='o', color='w', label='Not significant (p > 0.05)',
+           markerfacecolor=c2, markersize=8),
+]
+
+ax.legend(handles=legend_elements, loc=1, fontsize=11)
+
+plt.savefig(path + 'manuscript/figX-t2m-1941-lollipop.png', dpi=300)
+
+#%%
+
+"""
+Ranked lollipop chart for summer snowfall for 1941-2024.
+
+"""
+
+# Create significance flag
+df_sorted["sig_flag"] = df_sorted["sf_sum_sig_hindcast"].apply(lambda p: "Significant" if p < 0.05 else "Not Significant")
+
+# Main figure and axes
+fig, (ax) = plt.subplots(
+    1, 1,
+    figsize=(8, 4),
+    layout='constrained')
+
+# Colors for points based on significance
+colors1 = df_sorted["sig_flag"].map({"Significant": c1, "Not Significant": c2})
+
+# --- Main plot ---
+# Confidence intervals
+ax.vlines(
+    x=df_sorted.index,
+    ymin=df_sorted["sf_sum_low_slope"],
+    ymax=df_sorted["sf_sum_high_slope"],
+    color="k",
+    linewidth=1.5,
+    zorder=3,
+    alpha=0.5
+)
+
+# Slope points
+ax.scatter(df_sorted.index, df_sorted["sf_sum_slope_hindcast"], c=colors1, s=60, zorder=3)
+
+# Zero line
+ax.axhline(0, color="black", linewidth=1.5, linestyle="--", zorder=2)
+
+# Axis formatting
+ax.set_xticks(df_sorted.index)
+ax.set_xticklabels(df_sorted["station"], rotation=90)
+ax.xaxis.tick_top()
+ax.tick_params(axis='x', labeltop=True, labelbottom=False)
+ax.tick_params(axis='both', which='major', labelsize=11)
+ax.set_ylabel("Summer snowfall trend 1941-2024 (yr$^{-1}$)", fontsize=12)
+#ax.set_ylim(-0.02, 0.02)
+ax.grid(True, which="both", linestyle="--", linewidth=1, zorder=1)
 
 
+# --- Legend ---
+legend_elements = [
+    Line2D([0], [0], marker='o', color='w', label='Significant (p < 0.05)',
+           markerfacecolor=c1, markersize=8),
+    Line2D([0], [0], marker='o', color='w', label='Not significant (p > 0.05)',
+           markerfacecolor=c2, markersize=8),
+]
+
+ax.legend(handles=legend_elements, loc=4, fontsize=11)
+
+plt.savefig(path + 'manuscript/figX-sf-sum-1941-lollipop.png', dpi=300)
 
 
+#%%
+
+"""
+Ranked lollipop chart for winter snowfall for 1941-2024.
+
+"""
+
+# Create significance flag
+df_sorted["sig_flag"] = df_sorted["sf_win_sig_hindcast"].apply(lambda p: "Significant" if p < 0.05 else "Not Significant")
+
+# Main figure and axes
+fig, (ax) = plt.subplots(
+    1, 1,
+    figsize=(8, 4),
+    layout='constrained')
+
+# Colors for points based on significance
+colors1 = df_sorted["sig_flag"].map({"Significant": c1, "Not Significant": c2})
+
+# --- Main plot ---
+# Confidence intervals
+ax.vlines(
+    x=df_sorted.index,
+    ymin=df_sorted["sf_win_low_slope"],
+    ymax=df_sorted["sf_win_high_slope"],
+    color="k",
+    linewidth=1.5,
+    zorder=3,
+    alpha=0.5
+)
+
+# Slope points
+ax.scatter(df_sorted.index, df_sorted["sf_win_slope_hindcast"], c=colors1, s=60, zorder=3)
+
+# Zero line
+ax.axhline(0, color="black", linewidth=1.5, linestyle="--", zorder=2)
+
+# Axis formatting
+ax.set_xticks(df_sorted.index)
+ax.set_xticklabels(df_sorted["station"], rotation=90)
+ax.xaxis.tick_top()
+ax.tick_params(axis='x', labeltop=True, labelbottom=False)
+ax.tick_params(axis='both', which='major', labelsize=11)
+ax.set_ylabel("Winter snowfall trend 1941-2024 (yr$^{-1}$)", fontsize=12)
+#ax.set_ylim(-0.02, 0.02)
+ax.grid(True, which="both", linestyle="--", linewidth=1, zorder=1)
 
 
+# --- Legend ---
+legend_elements = [
+    Line2D([0], [0], marker='o', color='w', label='Significant (p < 0.05)',
+           markerfacecolor=c1, markersize=8),
+    Line2D([0], [0], marker='o', color='w', label='Not significant (p > 0.05)',
+           markerfacecolor=c2, markersize=8),
+]
+
+ax.legend(handles=legend_elements, loc=4, fontsize=11)
+
+plt.savefig(path + 'manuscript/figX-sf-win-1941-lollipop.png', dpi=300)
 
 
+#%%
 
 

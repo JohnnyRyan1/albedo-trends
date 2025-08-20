@@ -19,7 +19,7 @@ from sklearn.model_selection import train_test_split
 import pymannkendall as mk
 
 # Define user
-user = 'johnnyryan'
+user = 'jr555'
 
 # Define path
 path = '/Users/' + user + '/Library/CloudStorage/OneDrive-DukeUniversity/research/albedo/data/'
@@ -131,13 +131,18 @@ Determine primary drivers of albedo.
 
 """
 
+climate_df = pd.concat([
+    pd.DataFrame(station, columns=['station']),
+    pd.DataFrame(p_values, columns=['t2m_p', 'sf_winter_p', 'sf_summer_p']),
+    pd.DataFrame(r_values, columns=['t2m_r', 'sf_winter_r', 'sf_summer_r'])
+], axis=1)
 
-p_df = pd.DataFrame(p_values, columns=['t2m', 'sf_winter', 'sf_summer'])
-r_df = pd.DataFrame(r_values, columns=['t2m', 'sf_winter', 'sf_summer'])
+climate_df.to_csv(path + 'climate-correlations.csv')
 
-print('Mean r between albedo and summer air temperature is %.2f' % (np.mean(r_df['t2m'])))
-print('Mean r between albedo and summer snwofall is %.2f' % (np.mean(r_df['sf_summer'])))
-print('Mean r between albedo and winter snowfall is %.2f' % (np.mean(r_df['sf_winter'])))
+
+print('Mean r between albedo and summer air temperature is %.2f' % (np.mean(climate_df['t2m_r'])))
+print('Mean r between albedo and summer snwofall is %.2f' % (np.mean(climate_df['sf_summer_r'])))
+print('Mean r between albedo and winter snowfall is %.2f' % (np.mean(climate_df['sf_winter_r'])))
 
 #%%
 
@@ -147,35 +152,10 @@ Investigate if albedo is decreasing after removing dependence on summer air temp
 
 """
 
-residual_df = pd.DataFrame(list(zip(station, residual_trend)), columns=['station', 'residual_trend'])
+residual_df = pd.DataFrame(list(zip(station, residual_trend, residual_sig)), 
+                           columns=['station', 'residual_trend', 'residual_sig'])
 
-#%%
-
-"""
-
-Benchmark a multiple linear regression for predicting albedo.
-
-"""
-
-linear_df = pd.DataFrame(list(zip(station, rmse_linear)), columns=['station', 'linear'])
-
-#%%
-
-"""
-
-Investigate if sensitivity of albedo is correlated with air temperatures.
-
-"""
-
-cool_mask = df['t2m'] < np.median(df['t2m'])
-warm_mask = df['t2m'] >= np.median(df['t2m'])
-
-# Regress albedo vs. temp in each bin
-model_cool = LinearRegression().fit(df['t2m'][cool_mask].values.reshape(-1, 1), df['mcd'][cool_mask])
-model_warm = LinearRegression().fit(df['t2m'][warm_mask].values.reshape(-1, 1), df['mcd'][warm_mask])
-
-print(f"Slope (cool temps): {model_cool.coef_[0]:.3f}")
-print(f"Slope (warm temps): {model_warm.coef_[0]:.3f}")
+residual_df.to_csv(path + 'residual.csv')
 
 #%%
 

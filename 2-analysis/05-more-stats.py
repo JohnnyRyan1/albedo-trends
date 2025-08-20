@@ -17,7 +17,7 @@ from scipy.stats import theilslopes
 import matplotlib.pyplot as plt
 
 # Define user
-user = 'jr555'
+user = 'johnnyryan'
 
 # Define path
 path = '/Users/' + user + '/Library/CloudStorage/OneDrive-DukeUniversity/research/albedo/'
@@ -50,8 +50,11 @@ stations1, stations2 = [], []
 albedo_trend_modern, albedo_trend_hindcast = [], []
 albedo_sig_hindcast, albedo_slope_hindcast, albedo_low_slope, albedo_high_slope = [], [], [], []
 t2m_trend_modern, t2m_trend_hindcast = [], []
+t2m_sig_hindcast, t2m_slope_hindcast, t2m_low_slope, t2m_high_slope = [], [], [], []
 sf_sum_trend_modern, sf_sum_trend_hindcast = [], []
+sf_sum_sig_hindcast, sf_sum_slope_hindcast, sf_sum_low_slope, sf_sum_high_slope = [], [], [], []
 sf_win_trend_modern, sf_win_trend_hindcast = [], []
+sf_win_sig_hindcast, sf_win_slope_hindcast, sf_win_low_slope, sf_win_high_slope = [], [], [], []
 
 for f in range(len(hindcast_files)):
     
@@ -78,12 +81,30 @@ for f in range(len(hindcast_files)):
     
     t2m_trend_modern.append(mk.original_test(modern_df['t2m']).trend)
     t2m_trend_hindcast.append(mk.original_test(hindcast_df['t2m']).trend)
+    t2m_sig_hindcast.append(mk.original_test(hindcast_df['t2m']).p)
+    t2m_slope_hindcast.append(mk.original_test(hindcast_df['t2m']).slope)
+    
+    slope, intercept, lo_slope, up_slope = theilslopes(hindcast_df['t2m'], x=hindcast_df['t2m'].index.year, alpha=0.95)
+    t2m_low_slope.append(lo_slope)
+    t2m_high_slope.append(up_slope)
 
     sf_sum_trend_modern.append(mk.original_test(modern_df['sf_summer']).trend)
     sf_sum_trend_hindcast.append(mk.original_test(hindcast_df['sf_summer']).trend)
+    sf_sum_sig_hindcast.append(mk.original_test(hindcast_df['sf_summer']).p)
+    sf_sum_slope_hindcast.append(mk.original_test(hindcast_df['sf_summer']).slope)
+    
+    slope, intercept, lo_slope, up_slope = theilslopes(hindcast_df['sf_summer'], x=hindcast_df['sf_summer'].index.year, alpha=0.95)
+    sf_sum_low_slope.append(lo_slope)
+    sf_sum_high_slope.append(up_slope)
     
     sf_win_trend_modern.append(mk.original_test(modern_df['sf_winter']).trend)
     sf_win_trend_hindcast.append(mk.original_test(hindcast_df['sf_winter']).trend)
+    sf_win_sig_hindcast.append(mk.original_test(hindcast_df['sf_winter']).p)
+    sf_win_slope_hindcast.append(mk.original_test(hindcast_df['sf_winter']).slope)
+    
+    slope, intercept, lo_slope, up_slope = theilslopes(hindcast_df['sf_winter'], x=hindcast_df['sf_winter'].index.year, alpha=0.95)
+    sf_win_low_slope.append(lo_slope)
+    sf_win_high_slope.append(up_slope)
 
     # Define empty list
     slopes_station = []
@@ -199,14 +220,26 @@ df_trend = pd.DataFrame(list(zip(stations1, albedo_trend_modern, albedo_trend_hi
                                  albedo_sig_hindcast, albedo_slope_hindcast,
                                  albedo_low_slope, albedo_high_slope,
                                  t2m_trend_modern, t2m_trend_hindcast,
+                                 t2m_sig_hindcast, t2m_slope_hindcast,
+                                 t2m_low_slope, t2m_high_slope,
                                  sf_sum_trend_modern, sf_sum_trend_hindcast,
-                                 sf_win_trend_modern, sf_win_trend_hindcast)),
+                                 sf_sum_sig_hindcast, sf_sum_slope_hindcast,
+                                 sf_sum_low_slope, sf_sum_high_slope,
+                                 sf_win_trend_modern, sf_win_trend_hindcast,
+                                 sf_win_sig_hindcast, sf_win_slope_hindcast,
+                                 sf_win_low_slope, sf_win_high_slope)),
                         columns=['station', 'albedo_trend_modern', 'albedo_trend_hindcast',
                                  'albedo_sig_hindcast', 'albedo_slope_hindcast',
                                  'albedo_low_slope', 'albedo_high_slope',
                                  't2m_trend_modern', 't2m_trend_hindcast',
+                                 't2m_sig_hindcast', 't2m_slope_hindcast',
+                                 't2m_low_slope', 't2m_high_slope',
                                  'sf_sum_trend_modern', 'sf_sum_trend_hindcast',
-                                 'sf_win_trend_modern', 'sf_win_trend_hindcast'])
+                                 'sf_sum_sig_hindcast', 'sf_sum_slope_hindcast',
+                                 'sf_sum_low_slope', 'sf_sum_high_slope',
+                                 'sf_win_trend_modern', 'sf_win_trend_hindcast',
+                                 'sf_win_sig_hindcast', 'sf_win_slope_hindcast',
+                                 'sf_win_low_slope', 'sf_win_high_slope'])
 
 df_trend.to_csv(path + 'data/hindcast.csv')
 

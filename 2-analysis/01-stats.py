@@ -270,13 +270,14 @@ Is the difference between MCD and AWS growing through time?
 """
 
 # Make DataFrame
-diff_df = pd.DataFrame(list(zip(station1, diff_trend, diff_sig, number)),
-                        columns=['station', 'diff_trend', 'diff_sig', 'count'])
+diff_df = pd.DataFrame(list(zip(station1, diff_trend, diff_sig)),
+                        columns=['station', 'diff_trend', 'diff_sig'])
 
 diff_no_trend = diff_df[diff_df['diff_trend'] == 'no trend']
 diff_increasing = diff_df[diff_df['diff_trend'] == 'increasing']
 diff_decreasing = diff_df[diff_df['diff_trend'] == 'decreasing']
 
+diff_df.to_csv(path + 'data/diff.csv')
 print('%.0f sites where difference between AWS and MCD is not changing' % (len(diff_no_trend)))
 print('%.0f sites where difference between AWS and MCD is increasing' % (len(diff_increasing)))
 print('%.0f sites where difference between AWS and MCD is decreasing' % (len(diff_decreasing)))
